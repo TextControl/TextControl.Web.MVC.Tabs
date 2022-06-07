@@ -1,0 +1,97 @@
+﻿@using TXTextControl.Web.MVC
+
+@{
+    ViewData["Title"] = "Document Tabs";
+}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button disabled class="nav-link active" id="doc1-tab" data-bs-toggle="tab" data-bs-target="#doc1" type="button" role="tab" aria-controls="doc1" aria-selected="true">Document 1</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button disabled class="nav-link" id="doc2-tab" data-bs-toggle="tab" data-bs-target="#doc2" type="button" role="tab" aria-controls="doc2" aria-selected="false">Document 2</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button disabled class="nav-link" id="doc3-tab" data-bs-toggle="tab" data-bs-target="#doc3" type="button" role="tab" aria-controls="doc3" aria-selected="false">Document 3</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="myTabContent">
+    <div style="height: 800px" class="tab-pane fade show active" id="doc1" role="tabpanel" aria-labelledby="doc1-tab">
+        
+        <!-- Document Editor DIV - this DIV will be moved within DOM -->
+        <div style="height: 100%" id="tx-editor">@Html.TXTextControl().TextControl(settings => {
+            settings.Dock = TXTextControl.Web.DockStyle.Fill;
+        }).Render()</div>
+        <!-- *** Document Editor DIV *** -->
+
+    </div>
+    <div style="height: 800px" class="tab-pane fade" id="doc2" role="tabpanel" aria-labelledby="doc2-tab"></div>
+    <div style="height: 800px" class="tab-pane fade" id="doc3" role="tabpanel" aria-labelledby="doc3-tab"></div>
+</div>
+
+@section Scripts {
+<script type="text/javascript">
+
+    TXTextControl.addEventListener("ribbonTabsLoaded", function() {
+
+        // disable tabs to enable a complete initialization process
+        // of the TXTextControl object
+        $("#myTab button").prop("disabled",false);
+
+        // remove all stored document entries
+        $("#myTab button").each(function() {
+            var deleteTab = $(this).attr("aria-controls");
+            localStorage.removeItem('tx-document_' + deleteTab);
+        });
+
+    });
+
+    $(document).ready(function(){
+
+        // event for previous tab
+        $(".nav-tabs button").on("hide.bs.tab", function(){
+
+            // previous tab name
+            var oldTab = $(this).attr("aria-controls");
+
+            // save the document to local storage
+            TXTextControl.saveDocument(TXTextControl.StreamType.InternalUnicodeFormat, function (e) {
+                localStorage.setItem('tx-document_' + oldTab, e.data);
+            });
+
+        });
+
+        // event for current tab
+        $(".nav-tabs button").on("show.bs.tab", function(){
+
+            // current tab name
+            var newTab = $(this).attr("aria-controls");
+
+            // get the previously stored document from local storage
+            const document = localStorage.getItem('tx-document_' + newTab);
+
+            // if document is not null, load the document
+            // and move the editorin DOM to new tab location
+            if (document !== null) {
+
+                TXTextControl.loadDocument(TXTextControl.StreamType.InternalUnicodeFormat, document, function() {
+                    $("#tx-editor").appendTo("#" + newTab);
+                });
+
+            }
+            // if document is null, clear the Text Control and move in DOM
+            else {
+                TXTextControl.resetContents(function() {
+                    $("#tx-editor").appendTo("#" + newTab);
+                });
+            }
+
+        });
+
+    });
+</script>
+}
+
+
+
