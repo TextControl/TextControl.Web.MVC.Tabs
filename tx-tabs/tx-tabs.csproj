@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.5" />
-    <PackageReference Include="TXTextControl.Web" Version="30.0.1002.500" />
+    <PackageReference Include="TXTextControl.Web" Version="31.0.0" />
   </ItemGroup>
 
 </Project>
